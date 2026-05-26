@@ -75,67 +75,6 @@ Watch how each tree rebalances after a single insertion or deletion:
 <div align="center">
 <img src="docs/split-view.png" alt="Split-View Visualization" width="600"/>
 </div>
-
----
-
-## 🏗️ Architecture
-
-### ⚙️ Stateless C++ Engines
-
-Both `avl_tree.cpp` and `red_black_tree.cpp` hold zero memory between requests. The React frontend sends operation history as command-line arguments:
-
-```bash
-./avl i10 i20 i30 d20 i25
-```
-
-The engine:
-1. Fast-forwards through `i10 i20 i30 d20` without capturing frames
-2. Captures frame-by-frame animation for the final operation `i25`
-3. Outputs JSON with animation frames and telemetry
-4. Exits (no daemon, no state persistence)
-
-This design enables:
-- **↩️ Instant undo/redo**: Rebuild tree state from history array
-- **🎬 Deterministic replay**: Same input history = identical output frames
-- **⚡ Parallel execution**: AVL and RBT engines run simultaneously via FastAPI
-
-### 📸 Frame Capture System
-
-During the final operation, the engine takes deep-copy snapshots of the tree at each rebalancing step:
-
-```cpp
-void captureSnapshot(string op, string desc, node* root, node* highlight1, node* highlight2) {
-    SnapshotFrame frame;
-    frame.step_id = current_step_id++;
-    frame.operation_type = op;  // "AVL_UNBAL", "RBT_RECOLOR", etc.
-    frame.action_description = desc;
-    frame.root_snapshot = deepCopy(root);  // Full tree copy
-    // Mark highlighted nodes (pivot, parent, uncle, etc.)
-    animation_frames.push_back(frame);
-}
-```
-
-Each frame includes:
-- 🌲 Complete tree structure (node IDs, values, colors, parent/child pointers)
-- 🎯 Highlighted nodes with role labels (PIVOT, IMBALANCED, SUCCESSOR)
-- 📝 Human-readable description ("Right rotation around node 50")
-
-### 🛠️ Tech Stack
-
-<div align="center">
-
-![C++](https://img.shields.io/badge/C++-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
-![Python](https://img.shields.io/badge/Python-FastAPI-3776AB?style=flat-square&logo=python&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-Build-646CFF?style=flat-square&logo=vite&logoColor=white)
-
-</div>
-
-- **C++17**: AVL/RBT implementations with `nlohmann/json` serialization
-- **Python FastAPI**: HTTP router between React and C++ subprocesses
-- **React 18 + Vite**: SVG-based tree renderer with zoom/pan/step controls
-- **No external BST libraries**: All rotation logic, recoloring, and parent-pointer management written from scratch
-
 ---
 
 ## 📁 Project Structure
@@ -202,6 +141,66 @@ npm run dev
 Navigate to `http://localhost:5173`
 
 ---
+
+---
+
+## 🏗️ Architecture
+
+### ⚙️ Stateless C++ Engines
+
+Both `avl_tree.cpp` and `red_black_tree.cpp` hold zero memory between requests. The React frontend sends operation history as command-line arguments:
+
+```bash
+./avl i10 i20 i30 d20 i25
+```
+
+The engine:
+1. Fast-forwards through `i10 i20 i30 d20` without capturing frames
+2. Captures frame-by-frame animation for the final operation `i25`
+3. Outputs JSON with animation frames and telemetry
+4. Exits (no daemon, no state persistence)
+
+This design enables:
+- **↩️ Instant undo/redo**: Rebuild tree state from history array
+- **🎬 Deterministic replay**: Same input history = identical output frames
+- **⚡ Parallel execution**: AVL and RBT engines run simultaneously via FastAPI
+
+### 📸 Frame Capture System
+
+During the final operation, the engine takes deep-copy snapshots of the tree at each rebalancing step:
+
+```cpp
+void captureSnapshot(string op, string desc, node* root, node* highlight1, node* highlight2) {
+    SnapshotFrame frame;
+    frame.step_id = current_step_id++;
+    frame.operation_type = op;  // "AVL_UNBAL", "RBT_RECOLOR", etc.
+    frame.action_description = desc;
+    frame.root_snapshot = deepCopy(root);  // Full tree copy
+    // Mark highlighted nodes (pivot, parent, uncle, etc.)
+    animation_frames.push_back(frame);
+}
+```
+
+Each frame includes:
+- 🌲 Complete tree structure (node IDs, values, colors, parent/child pointers)
+- 🎯 Highlighted nodes with role labels (PIVOT, IMBALANCED, SUCCESSOR)
+- 📝 Human-readable description ("Right rotation around node 50")
+
+### 🛠️ Tech Stack
+
+<div align="center">
+
+![C++](https://img.shields.io/badge/C++-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
+![Python](https://img.shields.io/badge/Python-FastAPI-3776AB?style=flat-square&logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-Build-646CFF?style=flat-square&logo=vite&logoColor=white)
+
+</div>
+
+- **C++17**: AVL/RBT implementations with `nlohmann/json` serialization
+- **Python FastAPI**: HTTP router between React and C++ subprocesses
+- **React 18 + Vite**: SVG-based tree renderer with zoom/pan/step controls
+- **No external BST libraries**: All rotation logic, recoloring, and parent-pointer management written from scratch
 
 ## 🎮 Feature Breakdown
 
