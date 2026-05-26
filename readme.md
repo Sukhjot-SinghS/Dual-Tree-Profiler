@@ -75,8 +75,8 @@ Watch how each tree rebalances after a single insertion or deletion:
 <div align="center">
 <img src="docs/split-view.png" alt="Split-View Visualization" width="600"/>
 </div>
----
 
+---
 ## 📁 Project Structure
 
 ```
@@ -142,8 +142,6 @@ Navigate to `http://localhost:5173`
 
 ---
 
----
-
 ## 🏗️ Architecture
 
 ### ⚙️ Stateless C++ Engines
@@ -201,6 +199,8 @@ Each frame includes:
 - **Python FastAPI**: HTTP router between React and C++ subprocesses
 - **React 18 + Vite**: SVG-based tree renderer with zoom/pan/step controls
 - **No external BST libraries**: All rotation logic, recoloring, and parent-pointer management written from scratch
+
+---
 
 ## 🎮 Feature Breakdown
 
